@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Knitting Pattern Tool</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 18px;
+            line-height: 1.8;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            padding: 40px;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            font-size: 42px;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #3498db;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #7f8c8d;
+            font-size: 20px;
+            margin-bottom: 40px;
+        }
+        
+        .upload-section {
+            background: #ecf0f1;
+            border: 3px dashed #3498db;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .upload-instructions {
+            font-size: 22px;
+            color: #2c3e50;
+            margin-bottom: 25px;
+            font-weight: bold;
+        }
+        
+        .file-input-wrapper {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+        
+        input[type="file"] {
+            font-size: 18px;
+            padding: 15px;
+            border: 2px solid #3498db;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+        }
+        
+        .selected-file {
+            font-size: 20px;
+            color: #27ae60;
+            margin: 15px 0;
+            font-weight: bold;
+        }
+        
+        .btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 20px 50px;
+            font-size: 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(52, 152, 219, 0.3);
+            transition: all 0.3s;
+        }
+        
+        .btn:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(52, 152, 219, 0.4);
+        }
+        
+        .btn:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 30px 0;
+        }
+        
+        .loading.active {
+            display: block;
+        }
+        
+        .spinner {
+            border: 8px solid #f3f3f3;
+            border-top: 8px solid #3498db;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .loading-text {
+            font-size: 22px;
+            color: #2c3e50;
+            font-weight: bold;
+        }
+        
+        .error {
+            background: #e74c3c;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-size: 20px;
+            display: none;
+        }
+        
+        .error.active {
+            display: block;
+        }
+        
+        .pattern-result {
+            display: none;
+            margin-top: 30px;
+        }
+        
+        .pattern-result.active {
+            display: block;
+        }
+        
+        .pattern-header {
+            background: #3498db;
+            color: white;
+            padding: 25px;
+            border-radius: 10px 10px 0 0;
+            margin-bottom: 0;
+        }
+        
+        .pattern-title {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        
+        .pattern-difficulty {
+            font-size: 22px;
+            opacity: 0.9;
+        }
+        
+        .pattern-body {
+            border: 3px solid #3498db;
+            border-top: none;
+            border-radius: 0 0 10px 10px;
+            padding: 30px;
+        }
+        
+        .pattern-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .pattern-section h2 {
+            font-size: 26px;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #3498db;
+        }
+        
+        .pattern-section p, .pattern-section li {
+            font-size: 20px;
+            color: #34495e;
+            margin: 10px 0;
+        }
+        
+        .pattern-section ul {
+            padding-left: 25px;
+        }
+        
+        .instruction-step {
+            background: white;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 8px;
+            border-left: 5px solid #3498db;
+        }
+        
+        .step-number {
+            display: inline-block;
+            background: #3498db;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 40px;
+            font-weight: bold;
+            font-size: 20px;
+            margin-right: 15px;
+        }
+        
+        .step-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        
+        .step-description {
+            font-size: 19px;
+            color: #34495e;
+            line-height: 1.6;
+            white-space: pre-line;
+        }
+        
+        .btn-print {
+            background: #27ae60;
+            margin-top: 30px;
+        }
+        
+        .btn-print:hover {
+            background: #229954;
+        }
+        
+        .btn-new {
+            background: #95a5a6;
+            margin-top: 10px;
+        }
+        
+        .btn-new:hover {
+            background: #7f8c8d;
+        }
+        
+        @media print {
+            body {
+                background: white;
+            }
+            .upload-section, .btn {
+                display: none;
+            }
+            .container {
+                box-shadow: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧶 Knitting Pattern Tool 🧶</h1>
+        <p class="subtitle">Upload a photo and get detailed knitting instructions</p>
+        
+        <div class="upload-section">
+            <p class="upload-instructions">📸 Step 1: Choose a photo of your knitted item</p>
+            <div class="file-input-wrapper">
+                <input type="file" id="photoInput" accept="image/*" />
+            </div>
+            <div class="selected-file" id="selectedFile"></div>
+            <p class="upload-instructions">Step 2: Click the button below</p>
+            <button class="btn" id="uploadBtn" onclick="uploadPhoto()" disabled>
+                Create My Pattern
+            </button>
+        </div>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p class="loading-text">Analyzing your photo and creating pattern...<br>Please wait...</p>
+        </div>
+        
+        <div class="error" id="error"></div>
+        
+        <div class="pattern-result" id="patternResult">
+            <div class="pattern-header">
+                <h2 class="pattern-title" id="patternTitle">Your Knitting Pattern</h2>
+                <p class="pattern-difficulty" id="patternDifficulty"></p>
+            </div>
+            
+            <div class="pattern-body">
+                <div class="pattern-section">
+                    <h2>📏 Pattern Specifications</h2>
+                    <p><strong>Estimated Stitches:</strong> <span id="stitches"></span></p>
+                    <p><strong>Estimated Rows:</strong> <span id="rows"></span></p>
+                    <p><strong>Gauge:</strong> <span id="gauge"></span></p>
+                    <p><strong>Primary Stitch:</strong> <span id="primaryStitch"></span></p>
+                </div>
+                
+                <div class="pattern-section">
+                    <h2>🎨 Colors</h2>
+                    <ul id="colorList"></ul>
+                </div>
+                
+                <div class="pattern-section">
+                    <h2>🧵 Materials Needed</h2>
+                    <ul id="materialsList"></ul>
+                </div>
+                
+                <div class="pattern-section">
+                    <h2>📝 Step-by-Step Instructions</h2>
+                    <div id="instructionsList"></div>
+                </div>
+                
+                <button class="btn btn-print" onclick="window.print()">
+                    🖨️ Print Pattern
+                </button>
+                <button class="btn btn-new" onclick="startNew()">
+                    ↺ Create Another Pattern
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const photoInput = document.getElementById('photoInput');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const selectedFile = document.getElementById('selectedFile');
+        const loading = document.getElementById('loading');
+        const error = document.getElementById('error');
+        const patternResult = document.getElementById('patternResult');
+        
+        photoInput.addEventListener('change', function() {
+            if (this.files && this.files[0]) {
+                selectedFile.textContent = '✓ Photo selected: ' + this.files[0].name;
+                uploadBtn.disabled = false;
+            } else {
+                selectedFile.textContent = '';
+                uploadBtn.disabled = true;
+            }
+        });
+        
+        function showError(message) {
+            error.textContent = '⚠️ ' + message;
+            error.classList.add('active');
+            setTimeout(() => {
+                error.classList.remove('active');
+            }, 5000);
+        }
+        
+        function uploadPhoto() {
+            const file = photoInput.files[0];
+            if (!file) {
+                showError('Please select a photo first');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('photo', file);
+            
+            // Show loading
+            loading.classList.add('active');
+            patternResult.classList.remove('active');
+            uploadBtn.disabled = true;
+            
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                loading.classList.remove('active');
+                uploadBtn.disabled = false;
+                
+                if (data.error) {
+                    showError(data.error);
+                    return;
+                }
+                
+                if (data.success && data.pattern) {
+                    displayPattern(data.pattern);
+                }
+            })
+            .catch(err => {
+                loading.classList.remove('active');
+                uploadBtn.disabled = false;
+                showError('Failed to upload photo. Please try again.');
+                console.error(err);
+            });
+        }
+        
+        function displayPattern(pattern) {
+            document.getElementById('patternTitle').textContent = pattern.title;
+            document.getElementById('patternDifficulty').textContent = 'Difficulty Level: ' + pattern.difficulty;
+            document.getElementById('stitches').textContent = pattern.estimated_stitches;
+            document.getElementById('rows').textContent = pattern.estimated_rows;
+            document.getElementById('gauge').textContent = pattern.gauge;
+            document.getElementById('primaryStitch').textContent = pattern.primary_stitch;
+            
+            // Colors
+            const colorList = document.getElementById('colorList');
+            colorList.innerHTML = '';
+            pattern.colors.forEach(color => {
+                const li = document.createElement('li');
+                li.textContent = color;
+                colorList.appendChild(li);
+            });
+            
+            // Materials
+            const materialsList = document.getElementById('materialsList');
+            materialsList.innerHTML = '';
+            pattern.materials.forEach(material => {
+                const li = document.createElement('li');
+                li.textContent = material;
+                materialsList.appendChild(li);
+            });
+            
+            // Instructions
+            const instructionsList = document.getElementById('instructionsList');
+            instructionsList.innerHTML = '';
+            pattern.instructions.forEach(instruction => {
+                const stepDiv = document.createElement('div');
+                stepDiv.className = 'instruction-step';
+                stepDiv.innerHTML = `
+                    <span class="step-number">${instruction.step}</span>
+                    <div style="display: inline-block; width: calc(100% - 60px); vertical-align: top;">
+                        <div class="step-title">${instruction.title}</div>
+                        <div class="step-description">${instruction.description}</div>
+                    </div>
+                `;
+                instructionsList.appendChild(stepDiv);
+            });
+            
+            patternResult.classList.add('active');
+            
+            // Scroll to results
+            patternResult.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        
+        function startNew() {
+            patternResult.classList.remove('active');
+            photoInput.value = '';
+            selectedFile.textContent = '';
+            uploadBtn.disabled = true;
+            document.querySelector('.upload-section').scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
