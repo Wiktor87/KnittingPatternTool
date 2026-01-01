@@ -24,6 +24,28 @@ A simple and user-friendly web application that helps you create detailed knitti
 
 ### Setup Instructions
 
+#### Easy Setup (Recommended)
+
+1. **Clone or download this repository**
+
+2. **Open a terminal/command prompt and navigate to the project folder**
+
+3. **Run the startup script**:
+   
+   **On Windows**: Double-click `start.bat` or run in command prompt:
+   ```batch
+   start.bat
+   ```
+   
+   **On Mac/Linux**: Open terminal and run:
+   ```bash
+   ./start.sh
+   ```
+
+4. **The application will automatically open in your browser at http://localhost:5000**
+
+#### Manual Setup
+
 1. **Clone or download this repository**
 
 2. **Open a terminal/command prompt and navigate to the project folder**
