@@ -4,6 +4,7 @@ from werkzeug.utils import secure_filename
 import cv2
 import numpy as np
 from PIL import Image
+from scipy.cluster.vq import kmeans, vq
 
 app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
@@ -47,7 +48,6 @@ def analyze_knitting_pattern(image_path):
     pixels = img_rgb.reshape(-1, 3)
     
     # Use k-means to find dominant colors
-    from scipy.cluster.vq import kmeans, vq
     n_colors = min(5, len(np.unique(pixels, axis=0)))  # Max 5 colors
     
     # Convert to float for kmeans
@@ -56,8 +56,8 @@ def analyze_knitting_pattern(image_path):
     try:
         centroids, _ = kmeans(pixels_float, n_colors)
         centroids = np.uint8(centroids)
-    except:
-        # Fallback if kmeans fails
+    except (ValueError, RuntimeError) as e:
+        # Fallback if kmeans fails (e.g., not enough unique colors)
         unique_colors = np.unique(pixels, axis=0)[:n_colors]
         centroids = unique_colors
     
@@ -269,4 +269,11 @@ def upload_file():
         return jsonify({'error': f'Error processing image: {str(e)}'}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    # Get debug mode from environment variable, default to True for development
+    debug_mode = os.environ.get('FLASK_DEBUG', 'True').lower() == 'true'
+    # Get host from environment variable, default to 0.0.0.0 for development
+    host = os.environ.get('FLASK_HOST', '0.0.0.0')
+    # Get port from environment variable, default to 5000
+    port = int(os.environ.get('FLASK_PORT', 5000))
+    
+    app.run(debug=debug_mode, host=host, port=port)
